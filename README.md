@@ -4,3 +4,13 @@
 ## match_try.py
 class_identi.py 的辅助文件，存储了一些函数
 > 因为参考了其他代码，所以有些乱。
+## big-particles-identi
+对单帧静态大颗粒物的识别
+### sample.jpg 
+输入图像
+### multi_overlap.py
+运行的主程序，能够实现识别、重叠分离、轮廓拟合、计数、几何特征统计与分析、绘制粒径谱、提取每一个颗粒物放大图像
+### script.py
+辅助程序，存储一些函数
+### ideal output
+上述程序的理想输出
