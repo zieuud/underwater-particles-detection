@@ -1,28 +1,69 @@
 import networkx as nx
-import numpy as np
-import os
-import cv2
 
 
-def mea2box(mea):
-    center_x = mea[0] / 2
-    center_y = mea[1] / 2
-    w = mea[2]
-    h = mea[3]
-    return [int(i) for i in [center_x - w / 2, center_y - h / 2, center_x + w / 2, center_y + h / 2]]
+class Box:
+    def __init__(self, location):
+        self.location = location
+        self.box_track = [location]
+        xx, yy, ww, hh = location
+        self.track = [(xx + hh // 2, yy + ww // 2)]
+        self.terminate_count = 0
+
+    def location_add(self, new_location):
+        self.location = new_location
+        self.box_track.append(new_location)
+        xx, yy, ww, hh = new_location
+        self.track.append((xx + ww // 2, yy + hh // 2))
+
+    def not_found(self):
+        self.terminate_count += 1
+        self.location_add(self.location)
+
+
+def progressive_scan_identi(gray_input):
+    for row in range(len(gray_input)):
+        gray_scale = gray_input[row]
+        outliers = []
+        base = gray_scale[0]
+        for column in range(len(gray_scale)):
+            if column < len(gray_scale) - 1 and int(gray_scale[column + 1]) - int(base) > 5:
+                outliers.append(column + 1)
+            else:
+                base = gray_scale[column + 1] if column < len(gray_scale) - 1 else 0
+        for k in outliers:
+            gray_input[row, k] = 255
+    gray_temp = gray_input.T
+    for row in range(len(gray_temp)):
+        gray_scale = gray_temp[row]
+        white = 0
+        gap = 0
+        for column in range(len(gray_scale)):
+            if gray_scale[column] == 255:
+                if 0 < gap < 3:
+                    gray_scale[column - 1] = 255
+                    gray_scale[column - 2] = 255
+                white += 1
+                gap = 0
+            else:
+                gray_scale[column] = 0
+                if white == 1:
+                    gray_scale[column - 1] = 0
+                gap += 1
+                white = 0
+    gray_output = gray_temp.T
+    return gray_output
 
 
 def box2mea(box):
-    x = box[0]
-    y = box[1]
-    w = box[2] - x
-    h = box[3] - y
-    return [x, y, w, h]
+    x, y, w, h = box
+    x0 = x + w
+    y0 = y + h
+    return [x, y, x0, y0]
 
 
 def cal_iou(state, measure):  # 求交并比
-    state = mea2box(state)  # [lt_x, lt_y, rb_x, rb_y].T
-    measure = mea2box(measure)  # [lt_x, lt_y, rb_x, rb_y].T
+    state = box2mea(state)  # [lt_x, lt_y, rb_x, rb_y].T
+    measure = box2mea(measure)  # [lt_x, lt_y, rb_x, rb_y].T
     s_tl_x, s_tl_y, s_br_x, s_br_y = state[0], state[1], state[2], state[3]
     m_tl_x, m_tl_y, m_br_x, m_br_y = measure[0], measure[1], measure[2], measure[3]
     # 计算相交部分的坐标
