@@ -1,5 +1,5 @@
 # underwater-particles-detection
-## 主文件夹
+## match-track
 > - 2023.4.3 `class_indenti.py`和`match_try.py`更新，删去非必要代码，将函数和类整合在`match_try.py`中。
 ### class_identi.py 
 对5秒视频进行处理，使用了`progressive_scan_identi()`函数进行识别，将每一个检测到的颗粒物的轮廓框视为对象，以帧间轮廓框交并比为权值的最大匹配及进行目标追踪，并绘制运动轨迹线。
@@ -17,3 +17,8 @@ class_identi.py 的辅助文件，存储了一些函数
 辅助程序，存储一些函数
 ### ideal output
 上述程序的理想输出
+## kalman-track
+### kalman_identi.py
+基于卡尔曼滤波器目标追踪的主文件
+### kalman.py
+辅助文件
